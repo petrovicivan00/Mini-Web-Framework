@@ -47,15 +47,15 @@ public class ServerThread implements Runnable {
                 return;
             }
 
+        String path = request.getMethod() + ":" + request.getLocation().split("\\?")[0];
+            ControllerRoute controllerRoute = DIEngine.getInstance().getRoute(path);
+            Object response = null;
 
-            // Response example
-            Map<String, Object> responseMap = new HashMap<>();
-            responseMap.put("route_location", request.getLocation());
-            responseMap.put("route_method", request.getMethod().toString());
-            responseMap.put("parameters", request.getParameters());
-            Response response = new JsonResponse(responseMap);
+            if (controllerRoute != null)
+                response = controllerRoute.invokeMethod(request);
 
-            out.println(response.render());
+            if (response instanceof Response)
+                out.println(((Response) response).render());
 
             in.close();
             out.close();
