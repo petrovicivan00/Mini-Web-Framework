@@ -1,68 +1,58 @@
 # Mini Web Framework
 
-This is a custom web framework inspired by JAX-rs/Spring, designed to help you create web applications with controllers, request handling, and JSON response generation. The framework supports dependency injection at the controller level and allows you to define routes using annotations.
+This is a simple web framework developed as a Java project, inspired by JAX-RS and Spring. The framework allows you to create web applications based on controllers with methods that handle incoming requests and generate JSON responses. It also supports dependency injection at the controller level.
 
 ## Features
 
 ### Route Registration
-- Use the `@Controller` annotation to mark classes as controllers, indicating that they contain methods to handle client requests.
-- Annotate controller methods with `@GET` or `@POST` to specify the HTTP methods that trigger the method's execution.
-- Use the `@Path` annotation to define the route for the method to be activated.
-- The framework discovers annotated classes and methods, mapping HTTP methods and routes to controllers.
+
+You can define available routes in your application by annotating controller methods with the `@Path` annotation, which requires a mandatory parameter, the path. You can also specify the HTTP method for that route using the `@GET` or `@POST` annotations. For example, if you have a controller method annotated with `@Path("/test")` and `@GET`, it means that when a client sends a GET HTTP request to the path `/test`, it will trigger the corresponding controller method responsible for returning a response to the client.
 
 ### Dependency Injection
-- Achieve Inversion of Control (IoC) by initializing controller attributes using dependency injection.
-- Annotate controller attributes with `@Autowired` to indicate dependencies that should be injected during controller initialization.
-- Support for injecting dependencies with attributes annotated with `@Autowired`, which can also have their dependencies.
-- Two cases for initializing attributes annotated with `@Autowired`: concrete class type or interface type, with a `@Qualifier` option for interface-based injection.
 
-### Annotations
-- `@Autowired`: Mark attributes for dependency injection and optionally specify a `verbose` parameter for logging information.
-- `@Bean`, `@Service`, and `@Component`: Mark classes for dependency injection and specify the scope (singleton or prototype).
-- `@Qualifier`: Resolve which bean to inject by specifying a value for attribute or class-based injection.
+The framework achieves inversion of control (IoC) starting from the controller's attributes. Dependency injection is handled by a separate class, the DI Engine. You can annotate controller attributes that need to be injected with the `@Autowired` annotation. This annotation has an optional `verbose` parameter, which, when set to true, displays additional information about the injected object during initialization. Dependency injection can handle two cases:
+
+1. Annotated attribute with a specific class type.
+2. Annotated attribute with an interface type, requiring a Dependency Container to map the interface to its concrete implementation.
+
+The following annotations are provided for dependency injection:
+
+- `@Autowired`: Marks attributes for injection.
+- `@Bean`: Marks classes. You can specify the scope (singleton or prototype) with the `scope` parameter.
+- `@Service` and `@Component`: Behave like `@Bean` with predefined scope values.
+- `@Qualifier`: Resolves which specific bean to inject. It can annotate classes or attributes.
 
 ### Dependency Container
-- Register concrete implementations for interfaces in the Dependency Container.
-- Throw an exception if a requested type is not found in the container.
+
+The Dependency Container allows you to register concrete implementations for interfaces used in dependency injection. It throws an exception if a type is not registered in the container but is requested.
 
 ### DI Engine
-- Initialize dependencies recursively, starting from controllers.
-- Log information if the `verbose` parameter of `@Autowired` is set to true.
-- Manage instances of classes marked with `@Bean` or `@Service`, creating them only once during the application's execution.
-- Consult the Dependency Container when encountering interfaces to resolve their implementations.
 
-## Requirements
+The DI Engine is responsible for initializing all annotated dependencies using reflection, starting from the controller. It can display information if the `verbose` parameter in the `@Autowired` annotation is set to true. The DI Engine manages instances annotated with `@Bean(scope="singleton")` or `@Service` and initializes them only once during the application's execution. It also handles the initialization of class attributes using recursion. When it encounters an interface, it consults the Dependency Container and uses the Qualifier to get the appropriate implementation.
 
-- Each class should have a default constructor.
+## Technical Requirements
+
+- Each class should have a default (no-argument) constructor.
 - Attributes should not be static or final.
 - No class should inherit from another class.
-- Avoid circular dependencies.
+- There should be no circular dependencies among dependencies.
 
-## Technical Details
+## Usage
 
-- Implement the solution using reflection or Aspect-Oriented Programming (AOP).
-- Do not use external libraries for dependency injection.
+To use this framework, you can follow these steps:
 
-## Getting Started
+1. Clone the repository.
 
-- Clone this repository.
-- Configure your project.
-- Implement your controllers and services.
-- Run your application.
+2. Create your controllers by annotating methods with `@Path`, `@GET`, or `@POST` as needed.
 
-## Development Server
+3. Annotate attributes that need dependency injection with `@Autowired`.
 
-Run `ng serve` to start a development server. Navigate to `http://localhost:4200/` to access the application. The server automatically reloads when source files change.
+4. Optionally use `@Bean`, `@Service`, and `@Component` annotations to mark classes and specify their scopes.
 
-## Building
+5. When running your application, the framework will scan the classes, discover the controllers, and initialize the dependencies.
 
-Run `ng build` to build the project. Build artifacts are stored in the `dist/` directory.
+6. Handle incoming requests, and the framework will route them to the appropriate controller methods based on the annotated paths and HTTP methods.
 
-## Running Tests
+7. Enjoy the benefits of a lightweight web framework with dependency injection!
 
-- Run `ng test` to execute unit tests via Karma.
-- Run `ng e2e` to execute end-to-end tests.
-
-## Further Help
-
-For more information on the Angular CLI, use `ng help` or refer to the [Angular CLI documentation](https://angular.io/cli).
+Please note that this framework does not rely on external libraries for dependency injection.
